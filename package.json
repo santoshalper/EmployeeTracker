@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
+    "build": "npx tsc",
+    "start": "npm run build && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "inquirer": "^12.3.3",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
 }
