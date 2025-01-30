@@ -153,7 +153,7 @@ function addEmployee(): void{
                     if(err) {
                         console.log(err);
                     }else{
-                        console.log(`Added ${answers.first_name} ${answers.last_name} to roles`);
+                        console.log(`Added ${answers.first_name} ${answers.last_name} to employees`);
                     }
                     main(); 
                 })                 
@@ -294,6 +294,57 @@ function updateEmployeeManager(): void{
     },200);
 }
 
+function deleteDepartment(): void{
+    let departments: any = [];
+    pool.query('SELECT * FROM department',(err:Error, result: QueryResult) =>{
+        if(err){
+            console.log(err);
+            main();
+        }else if(result) {
+            departments = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+                {
+                    type:'list',
+                    name:'department',
+                    message:'Which department do you want to delete? ',
+                    choices:departments.map((dep:any) => {
+                        return {
+                            name:dep.name,
+                            value: dep.id
+                        }
+                    })
+                }
+            ])
+            .then((answers) => {
+                pool.query(`DELETE FROM employee USING role WHERE employee.role_id = role.id AND role.department_id = $1`,[answers.department],(err: Error, result: QueryResult) => {
+                    if(err){
+                        console.log(err);
+                    }else{
+                        console.log('employees deleted');
+                    }
+                })
+                pool.query(`DELETE FROM role WHERE department_id = $1`,[answers.department],(err:Error,result:QueryResult) => {
+                    if(err){
+                        console.log(err);
+                    }else{
+                        console.log('roles deleted');
+                    }
+                })
+                pool.query(`DELETE FROM department WHERE id = $1`,[answers.department],(err:Error,result:QueryResult) => {
+                    if(err){
+                        console.log(err);
+                    }else{
+                        console.log('Department deleted');
+                    }
+                    main();
+                })
+            })
+    },200);
+}
 function main(): void {
     inquirer
         .prompt([
@@ -310,6 +361,7 @@ function main(): void {
                     'Add Role',
                     'View All Departments',
                     'Add Department',
+                    'Delete Department',
                     'Quit'
                 ]
             }
@@ -363,6 +415,10 @@ function main(): void {
             }
             else if(answers.action === 'Add Department'){
                 addDepartment();
+                return;
+            }
+            else if(answers.action === 'Delete Department'){
+                deleteDepartment();
                 return;
             }
             else if(answers.action === 'Quit'){
