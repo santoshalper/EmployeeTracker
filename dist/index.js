@@ -160,7 +160,7 @@ function addEmployee() {
         });
     }, 200);
 }
-function updateEmployee() {
+function updateEmployeeRole() {
     let roles = [];
     let employees = [];
     pool.query('SELECT * FROM role', (err, result) => {
@@ -220,6 +220,82 @@ function updateEmployee() {
         });
     }, 200);
 }
+function updateEmployeeManager() {
+    let managers = [];
+    let employees = [];
+    pool.query('SELECT * FROM employee', (err, result) => {
+        if (err) {
+            console.log(err);
+            main();
+        }
+        else if (result) {
+            employees = result.rows;
+            managers = [...employees];
+            managers.unshift({
+                id: 0,
+                first_name: 'None',
+                last_name: '',
+                role_id: 0,
+                manager_id: null
+            });
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee\'s manager do you want to update? ',
+                choices: employees.map((emp) => {
+                    return {
+                        name: emp.first_name + ' ' + emp.last_name,
+                        value: emp.id
+                    };
+                })
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: 'Who is the employee\'s new manager',
+                choices: managers.map((man) => {
+                    return {
+                        name: man.first_name + ' ' + man.last_name,
+                        value: man.id
+                    };
+                })
+            }
+        ])
+            .then((answers) => {
+            let managerID = 0;
+            managers.forEach((man) => {
+                if (man.id === answers.manager) {
+                    if (answers.manager === 0) {
+                        managerID = null;
+                    }
+                    else {
+                        managerID = answers.manager;
+                    }
+                }
+            });
+            if (answers.employee === answers.manager) {
+                console.log("Employee can't manage themself");
+                main();
+            }
+            else {
+                pool.query(`UPDATE employee SET manager_id = $1 where id = $2`, [managerID, answers.employee], (err, result) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    else {
+                        console.log('Updated employees Manager');
+                    }
+                    main();
+                });
+            }
+        });
+    }, 200);
+}
 function main() {
     inquirer
         .prompt([
@@ -231,6 +307,7 @@ function main() {
                 'View All Employees',
                 'Add Employee',
                 'Update Employee Role',
+                'Update Employee Manager',
                 'View All Roles',
                 'Add Role',
                 'View All Departments',
@@ -256,7 +333,11 @@ function main() {
             return;
         }
         else if (answers.action === 'Update Employee Role') {
-            updateEmployee();
+            updateEmployeeRole();
+            return;
+        }
+        else if (answers.action === 'Update Employee Manager') {
+            updateEmployeeManager();
             return;
         }
         else if (answers.action === 'View All Roles') {
