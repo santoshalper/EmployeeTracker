@@ -327,16 +327,10 @@ function deleteDepartment() {
                 if (err) {
                     console.log(err);
                 }
-                else {
-                    console.log('employees deleted');
-                }
             });
             pool.query(`DELETE FROM role WHERE department_id = $1`, [answers.department], (err, result) => {
                 if (err) {
                     console.log(err);
-                }
-                else {
-                    console.log('roles deleted');
                 }
             });
             pool.query(`DELETE FROM department WHERE id = $1`, [answers.department], (err, result) => {
@@ -345,6 +339,89 @@ function deleteDepartment() {
                 }
                 else {
                     console.log('Department deleted');
+                }
+                main();
+            });
+        });
+    }, 200);
+}
+function deleteRole() {
+    let roles = [];
+    pool.query('SELECT * FROM role', (err, result) => {
+        if (err) {
+            console.log(err);
+            main();
+        }
+        else if (result) {
+            roles = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+            {
+                type: 'list',
+                name: 'role',
+                message: 'Which role do you want to delete? ',
+                choices: roles.map((role) => {
+                    return {
+                        name: role.title,
+                        value: role.id
+                    };
+                })
+            }
+        ])
+            .then((answers) => {
+            pool.query(`DELETE FROM employee WHERE role_id = $1`, [answers.role], (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+            pool.query(`DELETE FROM role WHERE id = $1`, [answers.role], (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    console.log('Role deleted');
+                }
+                main();
+            });
+        });
+    }, 200);
+}
+function deleteEmployee() {
+    let employees = [];
+    pool.query('SELECT * FROM employee', (err, result) => {
+        if (err) {
+            console.log(err);
+            main();
+        }
+        else if (result) {
+            employees = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee do you want to delete? ',
+                choices: employees.map((emp) => {
+                    return {
+                        name: emp.first_name + ' ' + emp.last_name,
+                        value: emp.id
+                    };
+                })
+            }
+        ])
+            .then((answers) => {
+            pool.query(`DELETE FROM employee WHERE id = $1`, [answers.employee], (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    console.log('Employee deleted');
                 }
                 main();
             });
@@ -367,6 +444,8 @@ function main() {
                 'Add Role',
                 'View All Departments',
                 'Add Department',
+                'Delete Employee',
+                'Delete Role',
                 'Delete Department',
                 'Quit'
             ]
@@ -424,6 +503,14 @@ function main() {
         }
         else if (answers.action === 'Add Department') {
             addDepartment();
+            return;
+        }
+        else if (answers.action === 'Delete Employee') {
+            deleteEmployee();
+            return;
+        }
+        else if (answers.action === 'Delete Role') {
+            deleteRole();
             return;
         }
         else if (answers.action === 'Delete Department') {

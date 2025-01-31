@@ -323,15 +323,11 @@ function deleteDepartment(): void{
                 pool.query(`DELETE FROM employee USING role WHERE employee.role_id = role.id AND role.department_id = $1`,[answers.department],(err: Error, result: QueryResult) => {
                     if(err){
                         console.log(err);
-                    }else{
-                        console.log('employees deleted');
                     }
                 })
                 pool.query(`DELETE FROM role WHERE department_id = $1`,[answers.department],(err:Error,result:QueryResult) => {
                     if(err){
                         console.log(err);
-                    }else{
-                        console.log('roles deleted');
                     }
                 })
                 pool.query(`DELETE FROM department WHERE id = $1`,[answers.department],(err:Error,result:QueryResult) => {
@@ -345,6 +341,90 @@ function deleteDepartment(): void{
             })
     },200);
 }
+
+function deleteRole(): void{
+    let roles:any = [];
+    pool.query('SELECT * FROM role',(err:Error, result:QueryResult) => {
+        if(err){
+            console.log(err);
+            main();
+        }else if(result){
+            roles = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+                {
+                    type:'list',
+                    name:'role',
+                    message:'Which role do you want to delete? ',
+                    choices:roles.map((role:any) => {
+                        return {
+                            name: role.title,
+                            value: role.id
+                        }
+                    })
+                }
+            ])
+            .then((answers) => {
+                pool.query(`DELETE FROM employee WHERE role_id = $1`,[answers.role],(err:Error, result:QueryResult) => {
+                    if(err){
+                        console.log(err);
+                    }
+                })
+                pool.query(`DELETE FROM role WHERE id = $1`,[answers.role], (err:Error, result: QueryResult) => {
+                    if(err){
+                        console.log(err);
+                    }else{
+                        console.log('Role deleted');
+                    }
+                    main();
+                })
+            })
+    },200)
+}
+
+function deleteEmployee(): void{
+    let employees: any = [];
+    pool.query('SELECT * FROM employee',(err:Error, result: QueryResult) => {
+        if(err){
+            console.log(err);
+            main();
+        }else if(result){
+            employees = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+                {
+                    type:'list',
+                    name:'employee',
+                    message:'Which employee do you want to delete? ',
+                    choices:employees.map((emp:any) => {
+                        return {
+                            name: emp.first_name + ' ' + emp.last_name,
+                            value: emp.id
+                        }
+                    })
+                }
+            ])
+            .then((answers) => {
+                pool.query(`DELETE FROM employee WHERE id = $1`,[answers.employee],(err:Error, result:QueryResult) => {
+                    if(err){
+                        console.log(err);
+                    }else{
+                        console.log('Employee deleted');
+                    }
+                    main();
+                })
+            })
+    },200)
+}
+
+
+
 function main(): void {
     inquirer
         .prompt([
@@ -361,6 +441,8 @@ function main(): void {
                     'Add Role',
                     'View All Departments',
                     'Add Department',
+                    'Delete Employee',
+                    'Delete Role',
                     'Delete Department',
                     'Quit'
                 ]
@@ -415,6 +497,14 @@ function main(): void {
             }
             else if(answers.action === 'Add Department'){
                 addDepartment();
+                return;
+            }
+            else if(answers.action === 'Delete Employee'){
+                deleteEmployee();
+                return;
+            }
+            else if(answers.action === 'Delete Role'){
+                deleteRole();
                 return;
             }
             else if(answers.action === 'Delete Department'){
