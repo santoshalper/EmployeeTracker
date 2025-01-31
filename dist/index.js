@@ -327,20 +327,24 @@ function deleteDepartment() {
                 if (err) {
                     console.log(err);
                 }
-            });
-            pool.query(`DELETE FROM role WHERE department_id = $1`, [answers.department], (err, result) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-            pool.query(`DELETE FROM department WHERE id = $1`, [answers.department], (err, result) => {
-                if (err) {
-                    console.log(err);
-                }
                 else {
-                    console.log('Department deleted');
+                    pool.query(`DELETE FROM role WHERE department_id = $1`, [answers.department], (err, result) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            pool.query(`DELETE FROM department WHERE id = $1`, [answers.department], (err, result) => {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                else {
+                                    console.log('Department deleted');
+                                }
+                                main();
+                            });
+                        }
+                    });
                 }
-                main();
             });
         });
     }, 200);
@@ -376,15 +380,17 @@ function deleteRole() {
                 if (err) {
                     console.log(err);
                 }
-            });
-            pool.query(`DELETE FROM role WHERE id = $1`, [answers.role], (err, result) => {
-                if (err) {
-                    console.log(err);
-                }
                 else {
-                    console.log('Role deleted');
+                    pool.query(`DELETE FROM role WHERE id = $1`, [answers.role], (err, result) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            console.log('Role deleted');
+                        }
+                        main();
+                    });
                 }
-                main();
             });
         });
     }, 200);
@@ -548,8 +554,7 @@ function totalBudgetByDepartment() {
                     console.log(err);
                 }
                 else if (result) {
-                    console.log();
-                    console.log(`the budget for the ${result.rows[0].department} department is $${result.rows[0].budget}`);
+                    console.log(`The budget for the ${result.rows[0].department} department is $${result.rows[0].budget}`);
                 }
                 setTimeout(() => {
                     main();

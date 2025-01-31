@@ -324,19 +324,23 @@ function deleteDepartment(): void{
                     if(err){
                         console.log(err);
                     }
-                })
-                pool.query(`DELETE FROM role WHERE department_id = $1`,[answers.department],(err:Error,result:QueryResult) => {
-                    if(err){
-                        console.log(err);
+                    else{
+                        pool.query(`DELETE FROM role WHERE department_id = $1`,[answers.department],(err:Error,result:QueryResult) => {
+                            if(err){
+                                console.log(err);
+                            }
+                            else{
+                                pool.query(`DELETE FROM department WHERE id = $1`,[answers.department],(err:Error,result:QueryResult) => {
+                                    if(err){
+                                        console.log(err);
+                                    }else{
+                                        console.log('Department deleted');
+                                    }
+                                    main();
+                                })
+                            }
+                        })
                     }
-                })
-                pool.query(`DELETE FROM department WHERE id = $1`,[answers.department],(err:Error,result:QueryResult) => {
-                    if(err){
-                        console.log(err);
-                    }else{
-                        console.log('Department deleted');
-                    }
-                    main();
                 })
             })
     },200);
@@ -372,15 +376,18 @@ function deleteRole(): void{
                     if(err){
                         console.log(err);
                     }
-                })
-                pool.query(`DELETE FROM role WHERE id = $1`,[answers.role], (err:Error, result: QueryResult) => {
-                    if(err){
-                        console.log(err);
-                    }else{
-                        console.log('Role deleted');
+                    else{
+                        pool.query(`DELETE FROM role WHERE id = $1`,[answers.role], (err:Error, result: QueryResult) => {
+                            if(err){
+                                console.log(err);
+                            }else{
+                                console.log('Role deleted');
+                            }
+                            main();
+                        })
                     }
-                    main();
                 })
+
             })
     },200)
 }
