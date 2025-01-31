@@ -428,6 +428,94 @@ function deleteEmployee() {
         });
     }, 200);
 }
+function viewEmployeeByDepartment() {
+    let departments = [];
+    pool.query('SELECT * FROM department', (err, result) => {
+        if (err) {
+            console.log(err);
+            main();
+        }
+        else if (result) {
+            departments = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: 'Which department\'s employees do you want to see? ',
+                choices: departments.map((dep) => {
+                    return {
+                        name: dep.name,
+                        value: dep.id
+                    };
+                })
+            }
+        ])
+            .then((answers) => {
+            pool.query(`SELECT CONCAT(employee.first_name, \' \', employee.last_name) AS employee, department.name AS department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = $1`, [answers.department], (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                else if (result) {
+                    console.log();
+                    console.table(result.rows);
+                }
+                setTimeout(() => {
+                    main();
+                }, 200);
+            });
+        });
+    }, 200);
+}
+function viewEmployeeByManager() {
+    let managers = [];
+    pool.query('SELECT * FROM employee', (err, result) => {
+        if (err) {
+            console.log(err);
+            main();
+        }
+        else if (result) {
+            managers = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+            {
+                type: 'list',
+                name: 'manager',
+                message: 'Which manager\'s employees do you want to see? ',
+                choices: managers.map((man) => {
+                    return {
+                        name: man.first_name + ' ' + man.last_name,
+                        value: man.id
+                    };
+                })
+            }
+        ])
+            .then((answers) => {
+            pool.query('SELECT CONCAT(employee.first_name,\' \',employee.last_name) AS employee, CONCAT(m.first_name, \' \', m.last_name) AS manager FROM employee JOIN employee m ON employee.manager_id = m.id WHERE m.id = $1', [answers.manager], (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                else if (result) {
+                    if (result.rows.length === 0) {
+                        console.log('Does not manage any employees');
+                    }
+                    else {
+                        console.table(result.rows);
+                    }
+                }
+                setTimeout(() => {
+                    main();
+                }, 200);
+            });
+        });
+    }, 200);
+}
 function main() {
     inquirer
         .prompt([
@@ -444,6 +532,8 @@ function main() {
                 'Add Role',
                 'View All Departments',
                 'Add Department',
+                'View Employees by Manager',
+                'View Employees by Department',
                 'Delete Employee',
                 'Delete Role',
                 'Delete Department',
@@ -503,6 +593,14 @@ function main() {
         }
         else if (answers.action === 'Add Department') {
             addDepartment();
+            return;
+        }
+        else if (answers.action === 'View Employees by Department') {
+            viewEmployeeByDepartment();
+            return;
+        }
+        else if (answers.action === 'View Employees by Manager') {
+            viewEmployeeByManager();
             return;
         }
         else if (answers.action === 'Delete Employee') {
