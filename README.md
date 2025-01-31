@@ -9,6 +9,7 @@ In this Employee Tracker app, a user can create a business structure by listing 
 Video of usage can be found at: https://drive.google.com/file/d/13M-7hIItqaKD8-uTE-zU3xF0wOlnWiIV/view
 
 The User can select the following options.
+
 ![example1](./assets/img/Capture1.PNG)
 * View all Employees in the company
 * Add an Employee while specifing its role and manager
