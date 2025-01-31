@@ -516,6 +516,48 @@ function viewEmployeeByManager() {
         });
     }, 200);
 }
+function totalBudgetByDepartment() {
+    let departments = [];
+    pool.query('SELECT * FROM department', (err, result) => {
+        if (err) {
+            console.log(err);
+            main();
+        }
+        else if (result) {
+            departments = result.rows;
+        }
+    });
+    setTimeout(() => {
+        inquirer
+            .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: 'Which department\'s budget do you want to see? ',
+                choices: departments.map((dep) => {
+                    return {
+                        name: dep.name,
+                        value: dep.id
+                    };
+                })
+            }
+        ])
+            .then((answers) => {
+            pool.query(`SELECT SUM(role.salary) AS budget, department.name AS department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = $1 GROUP BY department`, [answers.department], (err, result) => {
+                if (err) {
+                    console.log(err);
+                }
+                else if (result) {
+                    console.log();
+                    console.log(`the budget for the ${result.rows[0].department} department is $${result.rows[0].budget}`);
+                }
+                setTimeout(() => {
+                    main();
+                }, 200);
+            });
+        });
+    }, 200);
+}
 function main() {
     inquirer
         .prompt([
@@ -534,6 +576,7 @@ function main() {
                 'Add Department',
                 'View Employees by Manager',
                 'View Employees by Department',
+                'View Budget for Department',
                 'Delete Employee',
                 'Delete Role',
                 'Delete Department',
@@ -601,6 +644,10 @@ function main() {
         }
         else if (answers.action === 'View Employees by Manager') {
             viewEmployeeByManager();
+            return;
+        }
+        else if (answers.action === 'View Budget for Department') {
+            totalBudgetByDepartment();
             return;
         }
         else if (answers.action === 'Delete Employee') {
