@@ -4,9 +4,15 @@
 
 In this Employee Tracker app, a user can create a business structure by listing and adding Departments, Roles and Employees. Employees can be assigned specific roles and can be managed by another employee. Roles have specific titles and salaries assgined to them, and are connected to specific departments. Departments have specfic names, and are the main connector for all information.
 
+# Installation
+
+Run the console command 'npm i' or 'npm install' to install module dependencies
+
 ## Usage
 
 Video of usage can be found at: https://drive.google.com/file/d/13M-7hIItqaKD8-uTE-zU3xF0wOlnWiIV/view
+
+The program is run in the console with the command 'npm run start'
 
 The User can select the following options.
 
